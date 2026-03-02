@@ -1,0 +1,17 @@
+name: Run Weather Bot
+on:
+  schedule:
+    - cron: '0 1 * * *' # รันตอน 8 โมงเช้าเวลาไทยทุกวัน
+  workflow_dispatch: # เพิ่มปุ่มกดรันเองได้
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run bot
+        env:
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          pip install requests
+          python main.py
