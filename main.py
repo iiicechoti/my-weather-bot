@@ -7,23 +7,30 @@ def send_weather():
     api_key = os.getenv('WEATHER_API_KEY')
     webhook_url = os.getenv('DISCORD_WEBHOOK')
     
-    # 2. ลิงก์ที่ถูกต้อง (ห้ามมีดอกจันปน)
+    # 2. กำหนดค่าเมือง
     city = "Bangkok"
+    
+    # 3. สร้าง URL ที่ถูกต้อง (ตรวจสอบเครื่องหมาย / และ ? ให้ดีนะครับ)
     url = f"http://api.openweathermap.org{city}&appid={api_key}&units=metric&lang=th"
     
-    # 3. ดึงข้อมูล
-    res = requests.get(url).json()
+    # 4. ดึงข้อมูลสภาพอากาศ
+    response = requests.get(url)
+    res = response.json()
 
-    # 4. ตรวจสอบว่าดึงข้อมูลสำเร็จไหม
+    # 5. ตรวจสอบสถานะการดึงข้อมูล (200 คือสำเร็จ)
     if res.get("cod") == 200:
         temp = res['main']['temp']
+        # ดึงรายละเอียดสภาพอากาศ (ต้องมี [0] เพราะข้อมูลเป็น List)
         desc = res['weather'][0]['description']
-        message = f"📢 **รายงานอากาศวันนี้**\nเมือง: {city}\nอุณหภูมิ: {temp}°C\nสภาพอากาศ: {desc}"
         
-        # 5. ส่งเข้า Discord
+        message = f"📢 **รายงานอากาศวันนี้**\n📍 เมือง: {city}\n🌡️ อุณหภูมิ: {temp}°C\n☁️ สภาพอากาศ: {desc}"
+        
+        # 6. ส่งเข้า Discord ผ่าน Webhook
         requests.post(webhook_url, json={"content": message})
+        print("ส่งข้อมูลเข้า Discord สำเร็จ!")
     else:
-        print(f"Error: {res.get('message')}")
+        # ถ้าพัง จะพิมพ์บอกว่าพังเพราะอะไร (ดูได้ในหน้า Actions)
+        print(f"เกิดข้อผิดพลาดจาก API: {res.get('message')}")
 
 if __name__ == "__main__":
     send_weather()
